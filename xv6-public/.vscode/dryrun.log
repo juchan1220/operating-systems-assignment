@@ -1,0 +1,7 @@
+make all --dry-run --keep-going --print-directory
+make: Entering directory '/home/ubuntu/operating_system/xv6-public'
+ 
+make: *** No rule to make target 'all'.
+ 
+make: Leaving directory '/home/ubuntu/operating_system/xv6-public'
+ 
