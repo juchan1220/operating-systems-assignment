@@ -89,3 +89,14 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+/* 
+##########################################
+# Custom systemcall function 
+##########################################
+*/
+
+int sys_getppid(void) {
+  return myproc()->parent->pid;
+}
