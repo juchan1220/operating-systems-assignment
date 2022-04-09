@@ -26,6 +26,8 @@ int uptime(void);
 
 // custom systemcall
 int getppid(void);
+void yield(void);
+
 
 // ulib.c
 int stat(const char*, struct stat*);

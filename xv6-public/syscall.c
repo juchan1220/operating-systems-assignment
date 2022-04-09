@@ -106,6 +106,7 @@ extern int sys_uptime(void);
 
 // Custom systemcall function
 extern int sys_getppid(void);
+extern int sys_yield(void);
 
 
 static int (*syscalls[])(void) = {
@@ -133,6 +134,7 @@ static int (*syscalls[])(void) = {
 
 // Custom systemcall
 [SYS_getppid] sys_getppid,
+[SYS_yield] sys_yield,
 };
 
 void

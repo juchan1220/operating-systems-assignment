@@ -100,3 +100,17 @@ sys_uptime(void)
 int sys_getppid(void) {
   return myproc()->parent->pid;
 }
+
+int sys_yield(void) {
+  if (myproc() && myproc()->state == RUNNING) {
+    yield();
+  }
+
+  // 만약 yield 한 동안 누군가 이 user process를 죽인 경우
+  // 더 실행하지 않고 강제로 exit 시킴
+  if (myproc() && myproc()->killed) {
+    exit();
+  }
+
+  return 0;
+}
