@@ -1,4 +1,5 @@
 #!/bin/bash
 
+make clean
 make SCHED_POLICY=MULTILEVEL_SCHED
 make fs.img SCHED_POLICY=MULTILEVEL_SCHED
