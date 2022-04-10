@@ -7,12 +7,24 @@
 #include "proc.h"
 #include "spinlock.h"
 
+// Custom Debug Util Header
+#include "jc-utils.h"
+
+#define SCHED_POLICY_MULTILEVEL 1
+#define SCHED_POLICY_MLFQ 2
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
 
 static struct proc *initproc;
+
+#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
+
+#elif SCHED_POLICY == SCHED_POLICY_MLFQ
+
+#endif
 
 int nextpid = 1;
 extern void forkret(void);
@@ -324,6 +336,13 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
+
+#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
+  int proc_idx = 0;
+  int lookup_count;
+  struct proc *fcfs_target = 0;
+#endif
+
   c->proc = 0;
   
   for(;;){
@@ -332,6 +351,77 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
+    log_v("Multilevel Loop (re) starting...\n");
+    for (lookup_count = 0; lookup_count < NPROC; proc_idx = (proc_idx + 1) % NPROC){
+      p = &ptable.proc[proc_idx];
+      log_v("Lookup proc_idx = %d... ", proc_idx);
+
+      if (p->state != RUNNABLE) {
+        log_v("- Not Runnable. Skipped.\n");
+        goto skip;
+      }
+
+      log_v("- pid %d, ", p->pid);
+
+      // RUNNABLE && odd pid
+      if (p->pid % 2 == 1) {
+        if (!fcfs_target || fcfs_target->pid > p->pid) {
+          log_v("fcfs target changed. (old: %d)\n", fcfs_target ? fcfs_target->pid : -1);
+          fcfs_target = p;
+        } else {
+          log_v("fcfs target not changed. (old: %d)\n", fcfs_target->pid);
+        }
+        goto skip;
+      }
+
+      log_v("even pid found.\n");
+      // RUNNABLE && even pid
+      goto found_proc;
+
+
+      skip: // 모든 continue를 이곳에서 실행
+      lookup_count++;
+      // ptable을 한바퀴 돌았는데 odd pid 프로세스만 발견한 경우
+      if (lookup_count == NPROC) {
+        log_v("There is no Runnable RR.");
+        if (fcfs_target) {
+          log_v(" FCFS Selected.\n");
+          p = fcfs_target;
+          goto found_proc;
+        }
+
+        log_v("Breaking loop...\n");
+      }
+
+      continue;
+
+      found_proc: // 프로세스 스위치
+      log_v("Process Switching... (pid: %d)\n", p->pid);
+      lookup_count = 0;
+      fcfs_target = 0;
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+    }
+
+#elif SCHED_POLICY == SCHED_POLICY_MLFQ
+// TODO
+#else
+  // XV6 Default Round-Robin Scheduler
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -350,6 +440,7 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
+#endif
     release(&ptable.lock);
 
   }

@@ -78,6 +78,30 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+
+#############################
+### Project02
+#############################
+
+# Set Defines for CPU Scheduling Policy
+
+ifeq ($(SCHED_POLICY), MULTILEVEL_SCHED)
+	CFLAGS += -DSCHED_POLICY=1
+else ifeq ($(SCHED_POLICY), MLFQ_SCHED)
+	CFLAGS += -DSCHED_POLICY=2
+
+	ifdef MLFQ_K
+		CFLAGS += -DMLFQ_K=$(MLFQ_K)
+	endif
+endif
+
+# Enable Logging for debug
+ifeq ($(LOG_LEVEL), DEBUG)
+	CFLAGS += -DLOG_LEVEL=1
+else ifeq ($(LOG_LEVEL), VERBOSE)
+	CFLAGS += -DLOG_LEVEL=2
+endif
+
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
@@ -183,6 +207,7 @@ UPROGS=\
 	_zombie\
 	_project01\
 	_sys_yield_test\
+	_ml_test\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -252,7 +277,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c project01.c sys_yield_test.c\
+	printf.c umalloc.c project01.c sys_yield_test.c ml_test.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
