@@ -10,21 +10,12 @@
 // Custom Debug Util Header
 #include "jc-utils.h"
 
-#define SCHED_POLICY_MULTILEVEL 1
-#define SCHED_POLICY_MLFQ 2
-
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
 
 static struct proc *initproc;
-
-#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
-
-#elif SCHED_POLICY == SCHED_POLICY_MLFQ
-
-#endif
 
 int nextpid = 1;
 extern void forkret(void);
@@ -337,7 +328,7 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
 
-#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
+#ifdef SCHED_POLICY_MULTILEVEL
   int proc_idx = 0;
   int lookup_count;
   struct proc *fcfs_target = 0;
@@ -352,7 +343,7 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-#if SCHED_POLICY == SCHED_POLICY_MULTILEVEL
+#ifdef SCHED_POLICY_MULTILEVEL
     log_v("Multilevel Loop (re) starting...\n");
     for (lookup_count = 0; lookup_count < NPROC; proc_idx = (proc_idx + 1) % NPROC){
       p = &ptable.proc[proc_idx];
@@ -417,7 +408,8 @@ scheduler(void)
       c->proc = 0;
     }
 
-#elif SCHED_POLICY == SCHED_POLICY_MLFQ
+#else // show me #elifdef from C++23!
+#ifdef SCHED_POLICY_MLFQ
 // TODO
 #else
   // XV6 Default Round-Robin Scheduler
@@ -440,6 +432,7 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
+#endif
 #endif
     release(&ptable.lock);
 

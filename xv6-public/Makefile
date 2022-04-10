@@ -86,9 +86,9 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 # Set Defines for CPU Scheduling Policy
 
 ifeq ($(SCHED_POLICY), MULTILEVEL_SCHED)
-	CFLAGS += -DSCHED_POLICY=1
+	CPPFLAGS += -DSCHED_POLICY_MULTILEVEL
 else ifeq ($(SCHED_POLICY), MLFQ_SCHED)
-	CFLAGS += -DSCHED_POLICY=2
+	CPPFLAGS += -DSCHED_POLICY_MLFQ
 
 	ifdef MLFQ_K
 		CFLAGS += -DMLFQ_K=$(MLFQ_K)
