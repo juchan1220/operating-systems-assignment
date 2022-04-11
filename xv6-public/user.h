@@ -24,9 +24,15 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
-// custom systemcall
+// custom system call
 int getppid(void);
 void yield(void);
+
+// custom system call for MLFQ
+#ifdef SCHED_POLICY_MLFQ
+int getlev(void);
+int setpriority(int pid, int priority);
+#endif
 
 
 // ulib.c

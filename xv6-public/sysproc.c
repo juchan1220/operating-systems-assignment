@@ -71,7 +71,7 @@ sys_sleep(void)
       release(&tickslock);
       return -1;
     }
-    sleep(&ticks, &tickslock);
+    sleep_by_self(&ticks, &tickslock);
   }
   release(&tickslock);
   return 0;
@@ -102,15 +102,41 @@ int sys_getppid(void) {
 }
 
 int sys_yield(void) {
-  if (myproc() && myproc()->state == RUNNING) {
-    yield();
+  if (myproc()->state == RUNNING) {
+    yield_by_self();
   }
 
   // 만약 yield 한 동안 누군가 이 user process를 죽인 경우
   // 더 실행하지 않고 강제로 exit 시킴
-  if (myproc() && myproc()->killed) {
+  if (myproc()->killed) {
     exit();
   }
 
   return 0;
 }
+
+#ifdef SCHED_POLICY_MLFQ
+
+int sys_getlev(void) {
+  return myproc()->queue_level;
+}
+
+int sys_setpriority(void) {
+  int pid, priority;
+
+  if (argint(0, &pid) < 0) {
+    return -1;
+  }
+  
+  if (argint(1, &priority) < 0) {
+    return -1;
+  }
+
+  if (priority < 0 || 10 < priority) {
+    return -2;
+  }
+
+  return setpriority(pid, priority);
+}
+
+#endif

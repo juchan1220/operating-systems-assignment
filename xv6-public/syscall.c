@@ -104,10 +104,15 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 
-// Custom systemcall function
+// Custom system call function
 extern int sys_getppid(void);
 extern int sys_yield(void);
 
+// Custom system call function for MLFQ Scheduling
+#ifdef SCHED_POLICY_MLFQ
+extern int sys_getlev(void);
+extern int sys_setpriority(void);
+#endif
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,9 +137,16 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 
-// Custom systemcall
+// Custom systemc all
 [SYS_getppid] sys_getppid,
 [SYS_yield] sys_yield,
+
+// Custom system call for MLFQ Scheduling
+#ifdef SCHED_POLICY_MLFQ
+[SYS_getlev] sys_getlev,
+[SYS_setpriority] sys_setpriority,
+#endif
+
 };
 
 void

@@ -31,3 +31,8 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(getppid)
 SYSCALL(yield)
+
+#ifdef SCHED_POLICY_MLFQ
+SYSCALL(getlev)
+SYSCALL(setpriority)
+#endif
