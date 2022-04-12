@@ -71,7 +71,13 @@ sys_sleep(void)
       release(&tickslock);
       return -1;
     }
+
+#ifdef SCHED_POLICY_MLFQ
     sleep_by_self(&ticks, &tickslock);
+#else
+    sleep(&ticks, &tickslock);
+#endif
+
   }
   release(&tickslock);
   return 0;
@@ -103,7 +109,11 @@ int sys_getppid(void) {
 
 int sys_yield(void) {
   if (myproc()->state == RUNNING) {
+#ifdef SCHED_POLICY_MLFQ
     yield_by_self();
+#else
+    yield();
+#endif
   }
 
   // 만약 yield 한 동안 누군가 이 user process를 죽인 경우

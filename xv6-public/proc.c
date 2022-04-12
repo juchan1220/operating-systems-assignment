@@ -761,12 +761,15 @@ sched(void)
   mycpu()->intena = intena;
 }
 
+
 // Give up the CPU for one scheduling round.
 static void __wrapped_yield__ (int by_self) 
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+#ifdef SCHED_POLICY_MLFQ
   if (by_self) { myproc()->need_reset_lv_tq = 1; }
+#endif
   sched();
   release(&ptable.lock);
 }
@@ -775,9 +778,13 @@ void yield(void) {
   __wrapped_yield__(0);
 }
 
+#ifdef SCHED_POLICY_MLFQ
+
 void yield_by_self(void) {
   __wrapped_yield__(1);
 }
+
+#endif
 
 
 
@@ -827,7 +834,10 @@ static void __wrapped_sleep__(void *chan, struct spinlock *lk, int by_self)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
+
+#ifdef SCHED_POLICY_MLFQ
   if (by_self) { p->need_reset_lv_tq = 1; }
+#endif
 
   sched();
 
@@ -845,9 +855,13 @@ void sleep(void *chan, struct spinlock *lk) {
   __wrapped_sleep__(chan, lk, 0);
 }
 
+#ifdef SCHED_POLICY_MLFQ
+
 void sleep_by_self(void *chan, struct spinlock *lk) {
   __wrapped_sleep__(chan, lk, 1);
 }
+
+#endif
 
 //PAGEBREAK!
 // Wake up all processes sleeping on chan.
