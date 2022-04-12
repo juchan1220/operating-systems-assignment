@@ -207,8 +207,12 @@ UPROGS=\
 	_zombie\
 	_project01\
 	_sys_yield_test\
-	_ml_test\
-	_mlfq_test\
+
+ifeq ($(SCHED_POLICY), MULTILEVEL_SCHED)
+	UPROGS += _ml_test
+else ifeq ($(SCHED_POLICY), MLFQ_SCHED)
+	UPROGS += _mlfq_test
+endif
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -278,9 +282,15 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c project01.c sys_yield_test.c ml_test.c mlfq_test.c\
+	printf.c umalloc.c project01.c sys_yield_test.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
+
+ifeq ($(SCHED_POLICY), MULTILEVEL_SCHED)
+	EXTRA += ml_test.c
+else ifeq ($(SCHED_POLICY), MLFQ_SCHED)
+	EXTRA += mlfq_test.c
+endif
 
 dist:
 	rm -rf dist
