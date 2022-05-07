@@ -1,4 +1,4 @@
 #!/bin/bash
 
-make
-make fs.img
+make clean
+make && make fs.img

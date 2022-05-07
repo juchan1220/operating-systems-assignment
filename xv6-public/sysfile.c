@@ -43,12 +43,16 @@ fdalloc(struct file *f)
   int fd;
   struct proc *curproc = myproc();
 
+  pushcli();
   for(fd = 0; fd < NOFILE; fd++){
     if(curproc->ofile[fd] == 0){
       curproc->ofile[fd] = f;
+      popcli();
       return fd;
     }
   }
+
+  popcli();
   return -1;
 }
 
@@ -58,11 +62,17 @@ sys_dup(void)
   struct file *f;
   int fd;
 
-  if(argfd(0, 0, &f) < 0)
+  pushcli();
+  if(argfd(0, 0, &f) < 0) {
+    popcli();
     return -1;
-  if((fd=fdalloc(f)) < 0)
+  }
+  if((fd=fdalloc(f)) < 0) {
+    popcli();
     return -1;
+  }
   filedup(f);
+  popcli();
   return fd;
 }
 
@@ -73,9 +83,18 @@ sys_read(void)
   int n;
   char *p;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+  pushcli();
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0) {
+    popcli();
     return -1;
-  return fileread(f, p, n);
+  }
+  filedup(f);
+  popcli();
+
+  int ret = fileread(f, p, n);
+  fileclose(f);
+
+  return ret;
 }
 
 int
@@ -85,9 +104,18 @@ sys_write(void)
   int n;
   char *p;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+  pushcli();
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0) {
+    popcli();
     return -1;
-  return filewrite(f, p, n);
+  }
+  filedup(f);
+  popcli();
+
+  int ret = filewrite(f, p, n);
+  fileclose(f);
+
+  return ret;
 }
 
 int
@@ -96,10 +124,17 @@ sys_close(void)
   int fd;
   struct file *f;
 
-  if(argfd(0, &fd, &f) < 0)
+  pushcli();
+  if(argfd(0, &fd, &f) < 0) {
+    popcli();
     return -1;
+  }
+
   myproc()->ofile[fd] = 0;
+  popcli();
+
   fileclose(f);
+  
   return 0;
 }
 
@@ -109,9 +144,18 @@ sys_fstat(void)
   struct file *f;
   struct stat *st;
 
-  if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0)
+  pushcli();
+  if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0) {
+    popcli();
     return -1;
-  return filestat(f, st);
+  }
+  filedup(f);
+  popcli();
+
+  int ret = filestat(f, st);
+  fileclose(f);
+  
+  return ret;
 }
 
 // Create the path new as a link to the same inode as old.
@@ -416,6 +460,12 @@ sys_exec(void)
     if(fetchstr(uarg, &argv[i]) < 0)
       return -1;
   }
+
+  join_all_other_threads();
+
+  myproc()->exiting = 0;
+  myproc()->exiting_thread = 0;
+
   return exec(path, argv);
 }
 
