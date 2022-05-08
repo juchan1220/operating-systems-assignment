@@ -754,12 +754,7 @@ int thread_join_found (struct thread* t, void** retval_ptr, int set_retval) {
   if (t->will_joined != 0) {
     return -1;
   }
-
-  // 상호 join을 시도하는 경우
-  if (t->state == SLEEPING && t->chan == curproc->running_thread) {
-    return -1;
-  }
-
+  
   // exit() 담당 스레드에게 join을 시도하는 경우
   if (curproc->exiting_thread == t) {
     return -1;
