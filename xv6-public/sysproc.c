@@ -50,9 +50,16 @@ sys_sbrk(void)
 
   if(argint(0, &n) < 0)
     return -1;
+
+  pushcli();
+
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if(growproc(n) < 0) {
+    popcli();
     return -1;
+  }
+  
+  popcli();
   return addr;
 }
 
@@ -89,3 +96,44 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int sys_thread_create(void)
+{
+  int* thread_id_ptr;
+  thread_routine* start_routine;
+  void* arg;
+
+  if (argptr(0, (char **)&thread_id_ptr, sizeof(int)) != 0
+    || argint(1, (int *)&start_routine) != 0 
+    || argint(2, (int *)&arg) != 0
+  ) {
+    return -1;
+  }
+
+  return thread_create(thread_id_ptr, start_routine, arg);
+}
+
+int sys_thread_exit(void)
+{
+  void* retval;
+
+  if (argint(0, (int *)&retval) < 0) {
+    return -1;
+  }
+
+  thread_exit(retval); // never return
+  return 0; 
+}
+
+int sys_thread_join (void)
+{
+  int thread_id;
+  void **retval_ptr;
+
+  if (argint(0, &thread_id) < 0 || argptr(1, (char **)&retval_ptr, sizeof(void*)) < 0) {
+    return -1;
+  }
+
+  return thread_join(thread_id, retval_ptr);
+}
+
