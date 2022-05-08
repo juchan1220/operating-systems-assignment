@@ -121,12 +121,6 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
-#ifdef SCHED_POLICY_MLFQ
-int             setpriority (int, int); // for MLFQ Scheduling
-void            yield_by_self (void);
-void            sleep_by_self(void*, struct spinlock*);
-#endif
-
 // swtch.S
 void            swtch(struct context**, struct context*);
 

@@ -71,13 +71,7 @@ sys_sleep(void)
       release(&tickslock);
       return -1;
     }
-
-#ifdef SCHED_POLICY_MLFQ
-    sleep_by_self(&ticks, &tickslock);
-#else
     sleep(&ticks, &tickslock);
-#endif
-
   }
   release(&tickslock);
   return 0;
@@ -95,58 +89,3 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
-
-
-/* 
-##########################################
-# Custom systemcall function 
-##########################################
-*/
-
-int sys_getppid(void) {
-  return myproc()->parent->pid;
-}
-
-int sys_yield(void) {
-  if (myproc()->state == RUNNING) {
-#ifdef SCHED_POLICY_MLFQ
-    yield_by_self();
-#else
-    yield();
-#endif
-  }
-
-  // 만약 yield 한 동안 누군가 이 user process를 죽인 경우
-  // 더 실행하지 않고 강제로 exit 시킴
-  if (myproc()->killed) {
-    exit();
-  }
-
-  return 0;
-}
-
-#ifdef SCHED_POLICY_MLFQ
-
-int sys_getlev(void) {
-  return myproc()->queue_level;
-}
-
-int sys_setpriority(void) {
-  int pid, priority;
-
-  if (argint(0, &pid) < 0) {
-    return -1;
-  }
-  
-  if (argint(1, &priority) < 0) {
-    return -1;
-  }
-
-  if (priority < 0 || 10 < priority) {
-    return -2;
-  }
-
-  return setpriority(pid, priority);
-}
-
-#endif

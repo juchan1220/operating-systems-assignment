@@ -49,13 +49,6 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-#ifdef SCHED_POLICY_MLFQ
-  int remain_time_quantum;
-  int priority;
-  int queue_level;
-  int idx_on_queue;
-  int need_reset_lv_tq;
-#endif
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -63,13 +56,3 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
-
-
-#ifdef SCHED_POLICY_MLFQ
-
-struct proc_priority_queue {
-  struct proc* heap[NPROC + 1]; // 0 = Previous Scheduled Proc, 1 ~ NPROC = binary heap
-  int size;
-};
-
-#endif

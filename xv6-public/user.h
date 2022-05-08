@@ -24,17 +24,6 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
-// custom system call
-int getppid(void);
-void yield(void);
-
-// custom system call for MLFQ
-#ifdef SCHED_POLICY_MLFQ
-int getlev(void);
-int setpriority(int pid, int priority);
-#endif
-
-
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
@@ -48,4 +37,3 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
-
