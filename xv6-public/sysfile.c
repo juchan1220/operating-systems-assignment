@@ -463,7 +463,7 @@ sys_exec(void)
 
   join_all_other_threads();
 
-  myproc()->exiting = 0;
+  myproc()->killed = 0;
   myproc()->exiting_thread = 0;
 
   return exec(path, argv);

@@ -52,7 +52,6 @@ struct proc {
   struct thread *running_thread; // Shared: Current Running Thread
   struct thread *exiting_thread; // Shared: exit() thread
   int killed;                    // Shared: If non-zero, have been killed
-  int exiting;                   // Shared: If non-zero, process is exiting.
   struct file *ofile[NOFILE];    // Shared: Open files
   struct inode *cwd;             // Shared: Current directory
   char name[16];                 // Process name (debugging)

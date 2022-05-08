@@ -280,14 +280,14 @@ void join_all_other_threads() {
   cur_thread = curproc->running_thread;
 
   // 이미 다른 thread가 exit를 호출한 경우
-  if (curproc->exiting != 0) {
+  if (curproc->exiting_thread != 0) {
     // 먼저 exit를 호출한 스레드가 exit를 처리하도록 하고
     // 이 스레드는 trap에서 thread_exit 될 예정
     release(&ptable.lock);
     return ;
   }
 
-  curproc->exiting = 1;
+  curproc->killed = 1;
   curproc->exiting_thread = cur_thread;
 
   // 상호 대기를 방지하기 위해, exit 담당 스레드를 기다리는 스레드를 모두 꺠움
@@ -393,7 +393,6 @@ wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
-        p->exiting = 0;
         p->state = UNUSED;
         p->main_thread = 0;
         p->exiting_thread = 0;
