@@ -121,11 +121,6 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
-int             thread_create (int*, thread_routine*, void*);
-int             thread_join (int, void**);
-void            thread_exit (void*);
-void            join_all_other_threads(void);
-
 // swtch.S
 void            swtch(struct context**, struct context*);
 
