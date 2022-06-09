@@ -78,7 +78,7 @@ int main (void) {
 
     if (fork1() == 0) {
       if (login(userid_buf, passwd_buf) != 0) {
-        printf(2, "Login incorrect\n");
+        printf(2, "\nLogin incorrect\n");
         exit();
       }
 
