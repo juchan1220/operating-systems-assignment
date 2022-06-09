@@ -1,12 +1,12 @@
 #include "types.h"
-#include "x86.h"
 #include "defs.h"
-#include "date.h"
-#include "stat.h"
 #include "param.h"
-#include "memlayout.h"
+#include "stat.h"
 #include "mmu.h"
 #include "proc.h"
+#include "fs.h"
+#include "spinlock.h"
+#include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
 
@@ -31,7 +31,7 @@ static void set_cwd_as_home_directory (char *userid) {
   char path[USER_ID_MAXLEN + 1];
 
   path[0] = '/';
-  if (strcmp("root", userid, USER_ID_MAXLEN) != 0) {
+  if (strncmp("root", userid, USER_ID_MAXLEN) != 0) {
     strncpy(&path[1], userid, USER_ID_MAXLEN);
   } else {
     path[1] = '\0';
