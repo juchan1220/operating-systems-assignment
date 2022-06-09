@@ -99,6 +99,16 @@ bad:
     panic("failed to initialize user table!");
 }
 
+int is_valid_userid (const char* userid) {
+    int l = strlen(userid);
+    return 2 <= l && l < USER_ID_MAXLEN;
+}
+
+int is_valid_passwd (const char* passwd) {
+    int l = strlen(passwd);
+    return 2 <= l && l < USER_PW_MAXLEN;
+}
+
 struct User* find_user_with_userid (const char* userid) {
     for (int i = 0; i < NUSER; i++) {
         if (utable[i].uid == 0 || strncmp(utable[i].userid, userid, USER_ID_MAXLEN) != 0) { continue; }
@@ -109,9 +119,13 @@ struct User* find_user_with_userid (const char* userid) {
 }
 
 uint getuid (char* userid, char* passwd) {
+    if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
+        return 0;
+    }
+
     struct User* user = find_user_with_userid(userid);
 
-    if (user == 0 ||  strncmp(user->passwd, passwd, USER_PW_MAXLEN) != 0) {
+    if (user == 0 || strncmp(user->passwd, passwd, USER_PW_MAXLEN) != 0) {
         return 0;
     }
 
@@ -119,6 +133,10 @@ uint getuid (char* userid, char* passwd) {
 }
 
 uint add_user (char* userid, char* passwd) {
+    if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
+        return 0;
+    }
+
     struct User* empty = 0;
 
     for (int i = 0; i < NUSER; i++) {
@@ -146,6 +164,10 @@ uint add_user (char* userid, char* passwd) {
 }
 
 int delete_user (char* userid) {
+    if (is_valid_userid(userid) == 0) {
+        return -1;
+    }
+
     if (strncmp("root", userid, USER_ID_MAXLEN) == 0) {
         return -1;
     }
