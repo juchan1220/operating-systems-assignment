@@ -27,6 +27,7 @@ int uptime(void);
 int login (char*, char*);
 int addUser (char*, char*);
 int deleteUser (char*);
+int init_usertable (void);
 
 // ulib.c
 int stat(const char*, struct stat*);

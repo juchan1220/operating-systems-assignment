@@ -186,5 +186,11 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
+// usermanage.c
+int init_usertable (void);
+
+// sysfile.c
+struct inode* create (char*, short, short, short);
+
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

@@ -3,6 +3,10 @@
 #include "types.h"
 #include "defs.h"
 
+int sys_init_usertable (void) {
+  return init_usertable();
+}
+
 int sys_login (void) {
   char *userid, *passwd;
   
@@ -15,7 +19,7 @@ int sys_login (void) {
   return 0;
 }
 
-int sys_adduser (void) {
+int sys_addUser (void) {
   char *userid, *passwd;
   
   if (argstr(0, &userid) < 0 || argstr(1, &passwd) < 0) {
@@ -27,7 +31,7 @@ int sys_adduser (void) {
   return 0;
 }
 
-int sys_deleteuser (void) {
+int sys_deleteUser (void) {
   char *userid;
   
   if (argstr(0, &userid)) {

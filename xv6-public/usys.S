@@ -29,3 +29,8 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
+
+SYSCALL(login)
+SYSCALL(addUser)
+SYSCALL(deleteUser)
+SYSCALL(init_usertable)

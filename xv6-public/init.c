@@ -19,6 +19,11 @@ main(void)
   dup(0);  // stdout
   dup(0);  // stderr
 
+  if (init_usertable() != 0) {
+    printf(2, "utable already initialized. something goes wrong...\n");
+    exit();
+  }
+
   for(;;){
     printf(1, "init: starting login\n");
     pid = fork();

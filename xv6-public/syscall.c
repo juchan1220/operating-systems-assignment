@@ -105,8 +105,9 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 
 extern int sys_login(void);
-extern int sys_adduser(void);
-extern int sys_deleteuser(void);
+extern int sys_addUser(void);
+extern int sys_deleteUser(void);
+extern int sys_init_usertable(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,8 +133,9 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 
 [SYS_login]      sys_login,
-[SYS_adduser]    sys_adduser,
-[SYS_deleteuser] sys_deleteuser,
+[SYS_addUser]    sys_addUser,
+[SYS_deleteUser] sys_deleteUser,
+[SYS_init_usertable] sys_init_usertable,
 };
 
 void
