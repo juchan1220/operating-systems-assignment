@@ -19,6 +19,11 @@ static void create_home_directory (char* userid) {
   begin_op();
   struct inode *ip = create(path, T_DIR, 0, 0);
 
+  if (ip == 0) {
+    end_op();
+    return ;
+  }
+
   iunlockput(ip);
   end_op();
 }
