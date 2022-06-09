@@ -13,3 +13,4 @@
 #define FSSIZE       1000  // size of file system in blocks
 
 #define NUSER        10  // max # of users
+#define ROOT_UID     1   // user id of root

@@ -15,7 +15,7 @@ struct User {
 
 struct User utable[NUSER];
 
-uint next_uid = 1;
+uint next_uid = ROOT_UID + 1;
 static int utable_initialized = 0;
 
 static int s_strcmp (char* strA, char* strB) {
@@ -49,7 +49,7 @@ void create_usertable (void) {
         utable[0].passwd[i] = pw[i];
     }
 
-    utable[0].uid = 1;
+    utable[0].uid = ROOT_UID;
 
     struct inode *ip = create("/passwd", T_FILE, 0, 0);
     if (ip == 0) {
@@ -103,7 +103,6 @@ bad:
 }
 
 uint getuid (char* userid, char* passwd) {
-
     for (int i = 0; i < NUSER; i++) {
         if (utable[i].uid == 0
         || s_strcmp(userid, utable[i].userid) != 0
