@@ -3,6 +3,10 @@
 #include "defs.h"
 #include "param.h"
 #include "stat.h"
+#include "mmu.h"
+#include "proc.h"
+#include "spinlock.h"
+#include "sleeplock.h"
 
 struct User {
     char userid[USER_ID_MAXLEN];
@@ -15,6 +19,7 @@ struct User utable[NUSER];
 uint next_uid = ROOT_UID + 1;
 static int utable_initialized = 0;
 static struct inode* utable_ip = 0;
+static struct sleeplock utable_lock;
 
 // TODO: sleeplock for prevent race condition
 
@@ -93,6 +98,9 @@ finish:
 
     utable_ip = ip;
     utable_initialized = 1;
+
+    initsleeplock(&utable_lock, "utable");
+
     return 0;
 
 bad:
@@ -120,22 +128,29 @@ struct User* find_user_with_userid (const char* userid) {
 
 uint getuid (char* userid, char* passwd) {
     if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
+        releasesleep(&utable_lock);
         return 0;
     }
+
+    acquiresleep(&utable_lock);
 
     struct User* user = find_user_with_userid(userid);
 
     if (user == 0 || strncmp(user->passwd, passwd, USER_PW_MAXLEN) != 0) {
+        releasesleep(&utable_lock);
         return 0;
     }
 
+    releasesleep(&utable_lock);
     return user->uid;
 }
 
-uint add_user (char* userid, char* passwd) {
+uint add_user (char* userid, char* passwd) {    
     if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
         return 0;
     }
+
+    acquiresleep(&utable_lock);
 
     struct User* empty = 0;
 
@@ -146,11 +161,13 @@ uint add_user (char* userid, char* passwd) {
         }
 
         if (strncmp(utable[i].userid, userid, USER_ID_MAXLEN) == 0) {
+            releasesleep(&utable_lock);
             return 0;
         }
     }
 
     if (empty == 0) {
+        releasesleep(&utable_lock);
         return 0;
     }
 
@@ -159,6 +176,7 @@ uint add_user (char* userid, char* passwd) {
     empty->uid = next_uid++;
 
     export_usertable();
+    releasesleep(&utable_lock);
 
     return empty->uid;
 }
@@ -172,9 +190,12 @@ int delete_user (char* userid) {
         return -1;
     }
 
+    acquiresleep(&utable_lock);
+
     struct User* user = find_user_with_userid(userid);
 
     if (user == 0) {
+        releasesleep(&utable_lock);
         return -1;
     }
 
@@ -183,6 +204,7 @@ int delete_user (char* userid) {
     user->uid = 0;
 
     export_usertable();
+    releasesleep(&utable_lock);
 
     return 0;
 }
