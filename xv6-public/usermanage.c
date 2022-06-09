@@ -25,6 +25,7 @@ void write_usertable (struct inode* ip) {
         goto bad;
     }
 
+    return ;
 bad:
     panic("failed to write user table!");    
 }
