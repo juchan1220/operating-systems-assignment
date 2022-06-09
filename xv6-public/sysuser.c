@@ -10,10 +10,6 @@
 #include "file.h"
 #include "fcntl.h"
 
-int sys_init_usertable (void) {
-  return init_usertable();
-}
-
 static void create_home_directory (char* userid) {
   char path[USER_ID_MAXLEN + 1];
 

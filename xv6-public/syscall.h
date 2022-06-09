@@ -24,4 +24,3 @@
 #define SYS_login      22
 #define SYS_addUser    23
 #define SYS_deleteUser 24
-#define SYS_init_usertable 25

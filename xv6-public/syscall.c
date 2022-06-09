@@ -107,7 +107,6 @@ extern int sys_uptime(void);
 extern int sys_login(void);
 extern int sys_addUser(void);
 extern int sys_deleteUser(void);
-extern int sys_init_usertable(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -135,7 +134,6 @@ static int (*syscalls[])(void) = {
 [SYS_login]      sys_login,
 [SYS_addUser]    sys_addUser,
 [SYS_deleteUser] sys_deleteUser,
-[SYS_init_usertable] sys_init_usertable,
 };
 
 void

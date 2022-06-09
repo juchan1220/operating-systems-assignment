@@ -16,6 +16,8 @@ uint next_uid = ROOT_UID + 1;
 static int utable_initialized = 0;
 static struct inode* utable_ip = 0;
 
+// TODO: sleeplock for prevent race condition
+
 void write_usertable (struct inode* ip) {
     if (writei(ip, (char*)&next_uid, 0, sizeof(uint)) != sizeof(uint)) {
         goto bad;
