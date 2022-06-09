@@ -1,7 +1,11 @@
-
-
 #include "types.h"
+#include "x86.h"
 #include "defs.h"
+#include "date.h"
+#include "param.h"
+#include "memlayout.h"
+#include "mmu.h"
+#include "proc.h"
 
 int sys_init_usertable (void) {
   return init_usertable();
@@ -18,6 +22,8 @@ int sys_login (void) {
   if (uid == 0) {
     return -1;
   }
+  
+  // TODO: change cwd to home directory
 
   change_user(uid);
 
@@ -25,8 +31,11 @@ int sys_login (void) {
 }
 
 int sys_addUser (void) {
+  if (myproc()->uid != ROOT_UID) {
+    return -1;
+  }
+
   char *userid, *passwd;
-  
   if (argstr(0, &userid) < 0 || argstr(1, &passwd) < 0) {
     return -1;
   }
@@ -37,13 +46,14 @@ int sys_addUser (void) {
 }
 
 int sys_deleteUser (void) {
-  char *userid;
+  if (myproc()->uid != ROOT_UID) {
+    return -1;
+  }
   
-  if (argstr(0, &userid)) {
+  char *userid;
+  if (argstr(0, &userid) < 0) {
     return -1;
   }
 
-  // TODO
-
-  return 0;
+  return delete_user(userid);
 }

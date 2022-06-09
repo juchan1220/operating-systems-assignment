@@ -189,8 +189,11 @@ int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
 // usermanage.c
-int init_usertable (void);
-uint getuid (char*, char*);
+int             init_usertable (void);
+uint            getuid (char*, char*);
+uint            add_user (char*, char*);
+int             delete_user (char*);
+
 
 // sysfile.c
 struct inode* create (char*, short, short, short);
