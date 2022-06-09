@@ -120,6 +120,8 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void            change_user(uint);
+
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -188,6 +190,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // usermanage.c
 int init_usertable (void);
+uint getuid (char*, char*);
 
 // sysfile.c
 struct inode* create (char*, short, short, short);

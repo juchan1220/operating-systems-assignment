@@ -14,7 +14,12 @@ int sys_login (void) {
     return -1;
   }
 
-  // TODO
+  uint uid = getuid(userid, passwd);
+  if (uid == 0) {
+    return -1;
+  }
+
+  change_user(uid);
 
   return 0;
 }

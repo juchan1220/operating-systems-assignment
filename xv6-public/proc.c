@@ -138,6 +138,7 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
+  p->uid = 1; // uid of root
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -174,6 +175,10 @@ growproc(int n)
   return 0;
 }
 
+void change_user (uint uid) {
+  myproc()->uid = uid;
+}
+
 // Create a new process copying p as the parent.
 // Sets up stack to return as if from system call.
 // Caller must set state of returned proc to RUNNABLE.
@@ -196,6 +201,9 @@ fork(void)
     np->state = UNUSED;
     return -1;
   }
+  
+  np->uid = curproc->uid;
+
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;

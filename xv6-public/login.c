@@ -77,13 +77,12 @@ int main (void) {
     passwd_buf[strlen(passwd_buf) - 1] = 0;
 
     if (fork1() == 0) {
-      if (1) {
-        // TODO: login correct check
-      } else {
+      if (login(userid_buf, passwd_buf) != 0) {
         printf(2, "Login incorrect\n");
         exit();
       }
 
+      // TODO: if not root, then chdir to user home directory
       exec("sh", argv);
       printf(2, "exec sh failed\n");
       exit();

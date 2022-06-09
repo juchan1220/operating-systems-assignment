@@ -18,6 +18,18 @@ struct User utable[NUSER];
 uint next_uid = 1;
 static int utable_initialized = 0;
 
+static int s_strcmp (char* strA, char* strB) {
+    while (*strA == *strB) {
+        if (*strA == '\0' && *strB == '\0') {
+            return 0;
+        }
+
+        strA++; strB++;
+    }
+
+    return *strA - *strB;
+}
+
 void create_usertable (void) {
     next_uid = 1;
     
@@ -27,13 +39,13 @@ void create_usertable (void) {
         utable[i].uid = 0;
     }
 
-    char* root = "root";
-    for (int i = 0; i < 4; i++) {
+    char* root = "root\0";
+    for (int i = 0; i < 5; i++) {
         utable[0].userid[i] = root[i];
     }
 
-    char* pw = "0000";
-    for (int i = 0; i < 4; i++) {
+    char* pw = "0000\0";
+    for (int i = 0; i < 5; i++) {
         utable[0].passwd[i] = pw[i];
     }
 
@@ -88,4 +100,20 @@ int init_usertable (void) {
     return 0;
 bad:
     panic("failed to initialize user table!");
+}
+
+uint getuid (char* userid, char* passwd) {
+
+    for (int i = 0; i < NUSER; i++) {
+        if (utable[i].uid == 0
+        || s_strcmp(userid, utable[i].userid) != 0
+        || s_strcmp(passwd, utable[i].passwd) != 0
+        ) {
+            continue;
+        }
+
+        return utable[i].uid;
+    }
+
+    return 0;
 }
