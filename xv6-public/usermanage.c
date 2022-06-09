@@ -17,38 +17,19 @@ struct User utable[NUSER];
 
 uint next_uid = ROOT_UID + 1;
 static int utable_initialized = 0;
-
-static int s_strcmp (char* strA, char* strB) {
-    while (*strA == *strB) {
-        if (*strA == '\0' && *strB == '\0') {
-            return 0;
-        }
-
-        strA++; strB++;
-    }
-
-    return *strA - *strB;
-}
+static struct inode* passwd_ip = 0;
 
 void create_usertable (void) {
-    next_uid = 1;
+    next_uid = ROOT_UID + 1;
     
     for (int i = 1; i < NUSER; i++) {
-        utable[i].userid[0] = '\0';
-        utable[i].passwd[0] = '\0';
+        memset(utable[i].userid, '\0', USER_ID_MAXLEN);
+        memset(utable[i].passwd, '\0', USER_PW_MAXLEN);
         utable[i].uid = 0;
     }
 
-    char* root = "root\0";
-    for (int i = 0; i < 5; i++) {
-        utable[0].userid[i] = root[i];
-    }
-
-    char* pw = "0000\0";
-    for (int i = 0; i < 5; i++) {
-        utable[0].passwd[i] = pw[i];
-    }
-
+    safestrcpy(utable[0].userid, "root", 4);
+    safestrcpy(utable[0].passwd, "0000", 4);
     utable[0].uid = ROOT_UID;
 
     struct inode *ip = create("/passwd", T_FILE, 0, 0);
@@ -102,17 +83,44 @@ bad:
     panic("failed to initialize user table!");
 }
 
-uint getuid (char* userid, char* passwd) {
+struct User* find_user_with_userid (const char* userid) {
     for (int i = 0; i < NUSER; i++) {
-        if (utable[i].uid == 0
-        || s_strcmp(userid, utable[i].userid) != 0
-        || s_strcmp(passwd, utable[i].passwd) != 0
-        ) {
-            continue;
-        }
-
-        return utable[i].uid;
+        if (utable[i].uid == 0 || strncmp(utable[i].userid, userid, USER_ID_MAXLEN) != 0) { continue; }
+        return &utable[i];
     }
+
+    return 0;
+}
+
+uint getuid (char* userid, char* passwd) {
+    struct User* user = find_user_with_userid(userid);
+
+    if (user == 0 ||  strncmp(user->passwd, passwd, USER_PW_MAXLEN) != 0) {
+        return 0;
+    }
+
+    return user->uid;
+}
+
+
+uint add_user (char* userid, char* passwd) {
+
+}
+
+int delete_user (char* userid) {
+    if (strncmp("root", userid, USER_ID_MAXLEN) == 0) {
+        return -1;
+    }
+
+    struct User* user = find_user_with_userid(userid);
+
+    if (user == 0) {
+        return -1;
+    }
+
+    memset(user->userid, '\0', USER_ID_MAXLEN);
+    memset(user->passwd, '\0', USER_PW_MAXLEN);
+    user->uid = 0;
 
     return 0;
 }
