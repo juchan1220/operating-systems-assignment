@@ -63,21 +63,33 @@ int main (void) {
 
   // Login Infinite Loop
   while (1) {
-    getuserid(userid_buf, sizeof(userid_buf));
-    getuserpw(passwd_buf, sizeof(passwd_buf));
+    int ret = getuserid(userid_buf, sizeof(userid_buf));
+    int ret2 = getuserpw(passwd_buf, sizeof(passwd_buf));
 
-    // TODO: login correct check
-    if (1) {
-      if (fork1() == 0) {
-        // TODO: user setting
-        exec("sh", argv);
-        printf(2, "exec sh failed\n");
+    // 둘 중 하나라도 제대로 입력 받지 않은 경우 Incorrect 처리
+    if (ret != 0 || ret2 != 0) {
+      printf(2, "Login incorrect\n");
+      continue;
+    }
+
+    // 개행 제거
+    userid_buf[strlen(userid_buf) - 1] = 0;
+    passwd_buf[strlen(passwd_buf) - 1] = 0;
+
+    if (fork1() == 0) {
+      if (1) {
+        // TODO: login correct check
+      } else {
+        printf(2, "Login incorrect\n");
         exit();
       }
-      wait();
-    } else {
-      printf(2, "Login incorrect\n");
+
+      exec("sh", argv);
+      printf(2, "exec sh failed\n");
+      exit();
     }
+
+    wait();
   }
 
   exit(); 
