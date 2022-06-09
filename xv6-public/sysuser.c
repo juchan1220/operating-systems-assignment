@@ -2,13 +2,62 @@
 #include "x86.h"
 #include "defs.h"
 #include "date.h"
+#include "stat.h"
 #include "param.h"
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "file.h"
+#include "fcntl.h"
 
 int sys_init_usertable (void) {
   return init_usertable();
+}
+
+static void create_home_directory (char* userid) {
+  char path[USER_ID_MAXLEN + 1];
+
+  path[0] = '/';
+  strncpy(&path[1], userid, USER_ID_MAXLEN);
+
+  begin_op();
+  struct inode *ip = create(path, T_DIR, 0, 0);
+
+  iunlockput(ip);
+  end_op();
+}
+
+static void set_cwd_as_home_directory (char *userid) {
+  char path[USER_ID_MAXLEN + 1];
+
+  path[0] = '/';
+  if (strcmp("root", userid, USER_ID_MAXLEN) != 0) {
+    strncpy(&path[1], userid, USER_ID_MAXLEN);
+  } else {
+    path[1] = '\0';
+  }
+
+  begin_op();
+  struct inode *ip = namei(path);
+  struct proc* curproc = myproc();
+
+  if (ip == 0) {
+    end_op();
+    return ;
+  }
+
+  ilock(ip);
+  if (ip->type != T_DIR) {
+    iunlockput(ip);
+    end_op();
+    return ;
+  }
+
+  iunlock(ip);
+  iput(curproc->cwd);
+  end_op();
+
+  curproc->cwd = ip;
 }
 
 int sys_login (void) {
@@ -22,9 +71,8 @@ int sys_login (void) {
   if (uid == 0) {
     return -1;
   }
-  
-  // TODO: change cwd to home directory
 
+  set_cwd_as_home_directory(userid);
   change_user(uid);
 
   return 0;
@@ -46,7 +94,7 @@ int sys_addUser (void) {
     return -1;
   }
 
-  // TODO: create user's home directory
+  create_home_directory(userid);
 
   return 0;
 }

@@ -4,7 +4,7 @@
 #include "user.h"
 #include "fcntl.h"
 
-char *argv[] = { "sh", 0 };
+char *argv[] = { "/sh", 0 };
 
 
 int getuserid (char *buf, int nbuf)
@@ -82,8 +82,7 @@ int main (void) {
         exit();
       }
 
-      // TODO: if not root, then chdir to user home directory
-      exec("sh", argv);
+      exec("/sh", argv);
       printf(2, "exec sh failed\n");
       exit();
     }

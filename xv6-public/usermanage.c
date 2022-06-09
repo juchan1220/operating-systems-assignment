@@ -4,9 +4,6 @@
 #include "param.h"
 #include "stat.h"
 
-#define USER_ID_MAXLEN 16
-#define USER_PW_MAXLEN 16
-
 struct User {
     char userid[USER_ID_MAXLEN];
     char passwd[USER_PW_MAXLEN];
@@ -49,8 +46,8 @@ struct inode* create_usertable (void) {
         utable[i].uid = 0;
     }
 
-    safestrcpy(utable[0].userid, "root", 4);
-    safestrcpy(utable[0].passwd, "0000", 4);
+    strncpy(utable[0].userid, "root", USER_ID_MAXLEN);
+    strncpy(utable[0].passwd, "0000", USER_PW_MAXLEN);
     utable[0].uid = ROOT_UID;
 
     struct inode* ip = create("/passwd", T_FILE, 0, 0);
@@ -154,8 +151,8 @@ uint add_user (char* userid, char* passwd) {
         return 0;
     }
 
-    safestrcpy(empty->userid, userid, USER_ID_MAXLEN);
-    safestrcpy(empty->passwd, passwd, USER_PW_MAXLEN);
+    strncpy(empty->userid, userid, USER_ID_MAXLEN);
+    strncpy(empty->passwd, passwd, USER_PW_MAXLEN);
     empty->uid = next_uid++;
 
     export_usertable();
