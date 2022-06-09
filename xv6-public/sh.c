@@ -53,6 +53,8 @@ int fork1(void);  // Fork but panics on failure.
 void panic(char*);
 struct cmd *parsecmd(char*);
 
+char whitespace[];
+
 // Execute cmd.  Never returns.
 void
 runcmd(struct cmd *cmd)
@@ -141,6 +143,15 @@ getcmd(char *buf, int nbuf)
   return 0;
 }
 
+int is_logout (char *buf) {
+  char logout[] = "logout";
+  for (int i = 0; i < 6; i++) {
+    if (logout[i] != buf[i]) { return 0; }
+  }
+
+  return strchr(whitespace, buf[6]) != 0;
+}
+
 int
 main(void)
 {
@@ -163,7 +174,11 @@ main(void)
       if(chdir(buf+3) < 0)
         printf(2, "cannot cd %s\n", buf+3);
       continue;
+    } else if (is_logout(buf) != 0) {
+      // logout also must be performed by the parent, not the child.
+      break;
     }
+
     if(fork1() == 0)
       runcmd(parsecmd(buf));
     wait();
