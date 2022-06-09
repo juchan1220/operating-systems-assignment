@@ -118,9 +118,31 @@ uint getuid (char* userid, char* passwd) {
     return user->uid;
 }
 
-
 uint add_user (char* userid, char* passwd) {
+    struct User* empty = 0;
 
+    for (int i = 0; i < NUSER; i++) {
+        if (utable[i].uid == 0) {
+            empty = &utable[i];
+            continue;
+        }
+
+        if (strncmp(utable[i].userid, userid, USER_ID_MAXLEN) == 0) {
+            return 0;
+        }
+    }
+
+    if (empty == 0) {
+        return 0;
+    }
+
+    safestrcpy(empty->userid, userid, USER_ID_MAXLEN);
+    safestrcpy(empty->passwd, passwd, USER_PW_MAXLEN);
+    empty->uid = next_uid++;
+
+    export_usertable();
+
+    return empty->uid;
 }
 
 int delete_user (char* userid) {

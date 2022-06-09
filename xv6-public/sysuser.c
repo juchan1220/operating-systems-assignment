@@ -18,6 +18,12 @@ int sys_login (void) {
     return -1;
   }
 
+  int id_len = strlen(userid), pw_len = strlen(passwd);
+
+  if (id_len < 2 || 15 < id_len || pw_len < 2 || 15 < pw_len) {
+    return -1;
+  }
+
   uint uid = getuid(userid, passwd);
   if (uid == 0) {
     return -1;
@@ -40,7 +46,19 @@ int sys_addUser (void) {
     return -1;
   }
 
-  // TODO
+  int id_len = strlen(userid), pw_len = strlen(passwd);
+
+  if (id_len < 2 || 15 < id_len || pw_len < 2 || 15 < pw_len) {
+    return -1;
+  }
+
+  uint new_uid = add_user(userid, passwd);
+
+  if (new_uid == 0) {
+    return -1;
+  }
+
+  // TODO: create user's home directory
 
   return 0;
 }
@@ -52,6 +70,12 @@ int sys_deleteUser (void) {
   
   char *userid;
   if (argstr(0, &userid) < 0) {
+    return -1;
+  }
+
+  int id_len = strlen(userid);
+  
+  if (id_len < 2 || 15 < id_len) {
     return -1;
   }
 
