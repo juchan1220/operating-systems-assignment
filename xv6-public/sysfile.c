@@ -51,7 +51,7 @@ fdalloc(struct file *f)
   }
   return -1;
 }
-
+ 
 int
 sys_dup(void)
 {
@@ -240,6 +240,37 @@ bad:
   iunlockput(dp);
   end_op();
   return -1;
+}
+
+int sys_chmod (void) {
+  char* path;
+  int mode;
+
+  if(argstr(0, &path) < 0 || argint(1, &mode) < 0) {
+    return -1;
+  }
+
+  begin_op();
+
+  struct inode* ip = namei(path);
+  if (ip == 0) {
+    end_op();
+    return -1;
+  }
+
+  ilock(ip);
+  if (has_own(ip) == 0) {
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
+  ip->perm = (char)(mode & MODE_ALL);
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
+
+  return 0;
 }
 
 struct inode*

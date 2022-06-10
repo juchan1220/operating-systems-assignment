@@ -65,3 +65,5 @@ struct dirent {
 #define MODE_ROTH 4  // others read
 #define MODE_WOTH 2  // others write
 #define MODE_XOTH 1  // others execute
+
+#define MODE_ALL  63
