@@ -5,8 +5,10 @@
 #include "stat.h"
 #include "mmu.h"
 #include "proc.h"
+#include "fs.h"
 #include "spinlock.h"
 #include "sleeplock.h"
+#include "file.h"
 
 struct User {
     char username[USERNAME_MAXLEN];
@@ -62,6 +64,10 @@ struct inode* create_usertable (void) {
     if (ip == 0) {
         goto bad;
     }
+
+    ip->perm = MODE_RUSR | MODE_WUSR;
+    ip->owner = ROOT_UID;
+    iupdate(ip);
 
     write_usertable(ip);
     

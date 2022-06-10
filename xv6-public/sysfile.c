@@ -301,6 +301,9 @@ sys_open(void)
       end_op();
       return -1;
     }
+    ip->perm = MODE_RUSR | MODE_WUSR | MODE_ROTH;
+    ip->owner = myproc()->uid;
+    iupdate(ip);
   } else {
     if((ip = namei(path)) == 0){
       end_op();
@@ -343,6 +346,11 @@ sys_mkdir(void)
     end_op();
     return -1;
   }
+  
+  ip->perm = MODE_RUSR | MODE_WUSR | MODE_XUSR | MODE_ROTH | MODE_XOTH;
+  ip->owner = myproc()->uid;
+  iupdate(ip);
+
   iunlockput(ip);
   end_op();
   return 0;

@@ -10,7 +10,7 @@
 #include "file.h"
 #include "fcntl.h"
 
-static void create_home_directory (char* username) {
+static void create_home_directory (char* username, uint uid) {
   char path[USERNAME_MAXLEN + 1];
 
   path[0] = '/';
@@ -23,6 +23,10 @@ static void create_home_directory (char* username) {
     end_op();
     return ;
   }
+
+  ip->perm = MODE_RUSR | MODE_WUSR | MODE_XUSR | MODE_ROTH | MODE_XOTH;
+  ip->owner = uid;
+  iupdate(ip);
 
   iunlockput(ip);
   end_op();
@@ -95,7 +99,7 @@ int sys_addUser (void) {
     return -1;
   }
 
-  create_home_directory(username);
+  create_home_directory(username, new_uid);
 
   return 0;
 }
