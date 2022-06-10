@@ -126,6 +126,15 @@ struct User* find_user_with_username (const char* username) {
     return 0;
 }
 
+struct User* find_user_with_uid (uint uid) {
+    for (int i = 0; i < NUSER; i++) {
+        if (utable[i].uid == 0 || utable[i].uid != uid) { continue; }
+        return &utable[i];
+    }
+
+    return 0;
+}
+
 uint getuid (char* username, char* passwd) {
     if (is_valid_username(username) == 0 || is_valid_passwd(passwd) == 0) {
         releasesleep(&utable_lock);
@@ -206,5 +215,20 @@ int delete_user (char* username) {
     export_usertable();
     releasesleep(&utable_lock);
 
+    return 0;
+}
+
+int get_username_with_uid (uint uid, char* username) {
+    acquiresleep(&utable_lock);
+    struct User* user = find_user_with_uid(uid);
+
+    if (user == 0) {
+        releasesleep(&utable_lock);
+        return -1;
+    }
+
+    strncpy(username, user->username, USERNAME_MAXLEN);
+
+    releasesleep(&utable_lock);
     return 0;
 }

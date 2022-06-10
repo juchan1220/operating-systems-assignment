@@ -3,9 +3,12 @@
 #define T_DEV  3   // Device
 
 struct stat {
-  char type;  // Type of file
+  char perm;   // Permission of file
+  char type;   // Type of file
   int dev;     // File system's disk device
   uint ino;    // Inode number
   short nlink; // Number of links to file
   uint size;   // Size of file in bytes
+  uint owner;  // Owner of file
+  char owner_name[16];
 };

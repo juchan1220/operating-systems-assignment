@@ -448,6 +448,12 @@ stati(struct inode *ip, struct stat *st)
   st->type = ip->type;
   st->nlink = ip->nlink;
   st->size = ip->size;
+  st->perm = ip->perm;
+  st->owner = ip->owner;
+
+  if (get_username_with_uid(ip->owner, st->owner_name) != 0) {
+    st->owner_name[0] = '\0';
+  }
 }
 
 //PAGEBREAK!
