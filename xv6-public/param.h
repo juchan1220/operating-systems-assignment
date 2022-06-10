@@ -12,7 +12,7 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       1000  // size of file system in blocks
 
-#define USER_ID_MAXLEN 16
+#define USERNAME_MAXLEN 16
 #define USER_PW_MAXLEN 16
 
 #define NUSER        10  // max # of users

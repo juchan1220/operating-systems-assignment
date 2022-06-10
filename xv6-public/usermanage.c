@@ -9,7 +9,7 @@
 #include "sleeplock.h"
 
 struct User {
-    char userid[USER_ID_MAXLEN];
+    char username[USERNAME_MAXLEN];
     char passwd[USER_PW_MAXLEN];
     uint uid;
 };
@@ -49,12 +49,12 @@ struct inode* create_usertable (void) {
     next_uid = ROOT_UID + 1;
     
     for (int i = 1; i < NUSER; i++) {
-        memset(utable[i].userid, '\0', USER_ID_MAXLEN);
+        memset(utable[i].username, '\0', USERNAME_MAXLEN);
         memset(utable[i].passwd, '\0', USER_PW_MAXLEN);
         utable[i].uid = 0;
     }
 
-    strncpy(utable[0].userid, "root", USER_ID_MAXLEN);
+    strncpy(utable[0].username, "root", USERNAME_MAXLEN);
     strncpy(utable[0].passwd, "0000", USER_PW_MAXLEN);
     utable[0].uid = ROOT_UID;
 
@@ -107,9 +107,9 @@ bad:
     panic("failed to initialize user table!");
 }
 
-int is_valid_userid (const char* userid) {
-    int l = strlen(userid);
-    return 2 <= l && l < USER_ID_MAXLEN;
+int is_valid_username (const char* username) {
+    int l = strlen(username);
+    return 2 <= l && l < USERNAME_MAXLEN;
 }
 
 int is_valid_passwd (const char* passwd) {
@@ -117,24 +117,24 @@ int is_valid_passwd (const char* passwd) {
     return 2 <= l && l < USER_PW_MAXLEN;
 }
 
-struct User* find_user_with_userid (const char* userid) {
+struct User* find_user_with_username (const char* username) {
     for (int i = 0; i < NUSER; i++) {
-        if (utable[i].uid == 0 || strncmp(utable[i].userid, userid, USER_ID_MAXLEN) != 0) { continue; }
+        if (utable[i].uid == 0 || strncmp(utable[i].username, username, USERNAME_MAXLEN) != 0) { continue; }
         return &utable[i];
     }
 
     return 0;
 }
 
-uint getuid (char* userid, char* passwd) {
-    if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
+uint getuid (char* username, char* passwd) {
+    if (is_valid_username(username) == 0 || is_valid_passwd(passwd) == 0) {
         releasesleep(&utable_lock);
         return 0;
     }
 
     acquiresleep(&utable_lock);
 
-    struct User* user = find_user_with_userid(userid);
+    struct User* user = find_user_with_username(username);
 
     if (user == 0 || strncmp(user->passwd, passwd, USER_PW_MAXLEN) != 0) {
         releasesleep(&utable_lock);
@@ -145,8 +145,8 @@ uint getuid (char* userid, char* passwd) {
     return user->uid;
 }
 
-uint add_user (char* userid, char* passwd) {    
-    if (is_valid_userid(userid) == 0 || is_valid_passwd(passwd) == 0) {
+uint add_user (char* username, char* passwd) {    
+    if (is_valid_username(username) == 0 || is_valid_passwd(passwd) == 0) {
         return 0;
     }
 
@@ -160,7 +160,7 @@ uint add_user (char* userid, char* passwd) {
             continue;
         }
 
-        if (strncmp(utable[i].userid, userid, USER_ID_MAXLEN) == 0) {
+        if (strncmp(utable[i].username, username, USERNAME_MAXLEN) == 0) {
             releasesleep(&utable_lock);
             return 0;
         }
@@ -171,7 +171,7 @@ uint add_user (char* userid, char* passwd) {
         return 0;
     }
 
-    strncpy(empty->userid, userid, USER_ID_MAXLEN);
+    strncpy(empty->username, username, USERNAME_MAXLEN);
     strncpy(empty->passwd, passwd, USER_PW_MAXLEN);
     empty->uid = next_uid++;
 
@@ -181,25 +181,25 @@ uint add_user (char* userid, char* passwd) {
     return empty->uid;
 }
 
-int delete_user (char* userid) {
-    if (is_valid_userid(userid) == 0) {
+int delete_user (char* username) {
+    if (is_valid_username(username) == 0) {
         return -1;
     }
 
-    if (strncmp("root", userid, USER_ID_MAXLEN) == 0) {
+    if (strncmp("root", username, USERNAME_MAXLEN) == 0) {
         return -1;
     }
 
     acquiresleep(&utable_lock);
 
-    struct User* user = find_user_with_userid(userid);
+    struct User* user = find_user_with_username(username);
 
     if (user == 0) {
         releasesleep(&utable_lock);
         return -1;
     }
 
-    memset(user->userid, '\0', USER_ID_MAXLEN);
+    memset(user->username, '\0', USERNAME_MAXLEN);
     memset(user->passwd, '\0', USER_PW_MAXLEN);
     user->uid = 0;
 

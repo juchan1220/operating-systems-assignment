@@ -193,6 +193,7 @@ int             init_usertable (void);
 uint            getuid (char*, char*);
 uint            add_user (char*, char*);
 int             delete_user (char*);
+int             get_username_with_uid (uint, char*);
 
 
 // sysfile.c
