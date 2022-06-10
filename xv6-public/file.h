@@ -17,12 +17,14 @@ struct inode {
   struct sleeplock lock; // protects everything below here
   int valid;          // inode has been read from disk?
 
-  short type;         // copy of disk inode
+  char perm;          // copy of disk inode
+  char type;
   short major;
   short minor;
   short nlink;
   uint size;
   uint addrs[NDIRECT+1];
+  uint owner;
 };
 
 // table mapping major device number to
