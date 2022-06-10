@@ -53,6 +53,10 @@ int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 
+int             has_read_permission(struct inode*);
+int             has_write_permission(struct inode*);
+int             has_execute_permission(struct inode*);
+
 // ide.c
 void            ideinit(void);
 void            ideintr(void);

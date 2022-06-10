@@ -200,6 +200,10 @@ sys_unlink(void)
 
   ilock(dp);
 
+  if (has_write_permission(dp) == 0) {
+    goto bad;
+  }
+
   // Cannot unlink "." or "..".
   if(namecmp(name, ".") == 0 || namecmp(name, "..") == 0)
     goto bad;
@@ -251,9 +255,19 @@ create(char *path, short type, short major, short minor)
   if((ip = dirlookup(dp, name, 0)) != 0){
     iunlockput(dp);
     ilock(ip);
-    if(type == T_FILE && ip->type == T_FILE)
+    if(type == T_FILE && ip->type == T_FILE) {
+      if (has_write_permission(ip) == 0) {
+        return 0;
+      }
+
       return ip;
+    }
     iunlockput(ip);
+    return 0;
+  }
+
+  if (has_write_permission(dp) == 0) {
+    iunlockput(dp);
     return 0;
   }
 
@@ -317,6 +331,22 @@ sys_open(void)
     }
   }
 
+  if (omode == O_RDONLY || omode == O_RDWR) {
+    if (has_read_permission(ip) == 0) {
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  }
+
+  if (omode == O_WRONLY || omode == O_RDWR) {
+    if (has_write_permission(ip) == 0) {
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  }
+
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
       fileclose(f);
@@ -346,7 +376,7 @@ sys_mkdir(void)
     end_op();
     return -1;
   }
-  
+
   ip->perm = MODE_RUSR | MODE_WUSR | MODE_XUSR | MODE_ROTH | MODE_XOTH;
   ip->owner = myproc()->uid;
   iupdate(ip);
@@ -394,6 +424,14 @@ sys_chdir(void)
     end_op();
     return -1;
   }
+
+  if (has_execute_permission(ip) == 0) {
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
+
   iunlock(ip);
   iput(curproc->cwd);
   end_op();

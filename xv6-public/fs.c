@@ -23,6 +23,10 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);
+int has_read_permission(struct inode*);
+int has_write_permission(struct inode*);
+int has_execute_permission(struct inode*);
+
 // there should be one superblock per disk device, but we run with
 // only one device
 struct superblock sb; 
@@ -647,6 +651,12 @@ namex(char *path, int nameiparent, char *name)
       iunlockput(ip);
       return 0;
     }
+
+    if (has_execute_permission(ip) == 0) {
+      iunlockput(ip);
+      return 0;
+    }
+
     if(nameiparent && *path == '\0'){
       // Stop one level early.
       iunlock(ip);
@@ -677,4 +687,39 @@ struct inode*
 nameiparent(char *path, char *name)
 {
   return namex(path, 1, name);
+}
+
+int has_own (struct inode* ip) {
+  struct proc* curproc = myproc();
+  return (curproc->uid == ip->owner || curproc->uid == ROOT_UID) ? 1 : 0;
+}
+
+int has_read_permission (struct inode* ip) {
+  if (ip->type == T_DEV) { return 1; }
+
+  if (has_own(ip)) {
+    return (ip->perm & MODE_RUSR) ? 1 : 0;
+  }
+
+  return (ip->perm & MODE_ROTH) ? 1 : 0;
+}
+
+int has_write_permission (struct inode* ip) {
+  if (ip->type == T_DEV) { return 1; }
+
+  if (has_own(ip)) {
+    return (ip->perm & MODE_WUSR) ? 1 : 0;
+  }
+
+  return (ip->perm & MODE_WOTH) ? 1 : 0;
+}
+
+int has_execute_permission (struct inode* ip) {
+  if (ip->type == T_DEV) { return 1; }
+
+  if (has_own(ip)) {
+    return (ip->perm & MODE_XUSR) ? 1 : 0;
+  }
+
+  return (ip->perm & MODE_XOTH) ? 1 : 0;
 }
