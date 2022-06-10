@@ -186,6 +186,7 @@ UPROGS=\
 	_login\
 	_useradd_test\
 	_userdelete_test\
+	_chmod_test\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
